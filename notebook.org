@@ -1,0 +1,367 @@
+* Firsr commandment！
+1. when recurring on a list of atoms ,lat ask two questions about it: (null? lat) and else.
+2. when recurrint on a number, n ,ask two questions about it :(zero? n) and else.
+3. when recurrint on a S-expression , l, ask three questions about it: (null? l) (atom? (car l)) else. 
+* defination of atom list
+| atom  | list           |
+|-------+----------------|
+| asdf  | (asdf)         |
+| kkeis | (kk (asdf) kk) |
+
+* cdr car cons
+| cdr  | car   | cons |
+|------+-------+------|
+| left | first | add  |
+
+
+(car (cons a b)) = a
+(cdr (cons a b)) = b
+* null
+(null? S)判断是否为null
+(quote())
+()
+'()
+* atom?
+(atom? )
+#+begin_src scheme
+  (define atom?
+    (lambda (x)
+      (and (not (pair? x)) (not (null? x)))))
+#+end_src
+* eq?
+是否相等
+*注意：早期版本中的eq？是不能直接比较数字的所以才会有后面的eqan？
+  #+begin_src scheme
+    (eq? a1 a2)
+  #+end_src
+* lat?
+  #+begin_src scheme
+    (define lat?
+      (lambda (l)
+	(cond
+	 ((null? l) #t)
+	 ((atom? (car l)) (lat? (cdr l)))
+	 (else #f))))
+  #+end_src
+* or and not
+* member?
+  #+begin_src scheme
+    (define member?
+      (lambda (a lat)
+	(cond
+	 ((null? lat) #f)
+	 (else (or (eq? a (car lat))
+		   (memember? a (cdr lat)))))))
+    ;;如醍醐灌顶，妙哉妙哉！
+  #+end_src
+* (rember A lat)
+remove A memember (just onc
+#+begin_src scheme
+  (define rember
+    (lambda (a lat)
+      (cond
+       ((null? lat) (quote()))
+       ((eq? a (car lat)) (cdr lat))
+       (else (cons (car lat)
+		   (rember a (cdr lat)))))))
+  ;;最后有一个很妙的递归，将所有的car重新补全到刚才丢弃的位置，类似于进栈出栈
+#+end_src
+如果我要去掉全部的内容呢？
+#+begin_src scheme
+  (define remall
+    (lambda (a lat)
+      (cond
+       ((null? lat) (quote()))
+       ((eq? a (car lat)) (remall a (cdr lat)))
+       (else (cons (car lat) (remall a (cdr lat)))))))))
+  ;;注意：在没有改良前有一个最大递归深度的问题，看来scheme的语法控制很严格啊。。。
+#+end_src
+* (firsts l)
+  #+begin_src scheme
+    (define firsts
+      (lambda (l)
+	(cond (null? l) (quote()))
+	(else (cons (car (car l)) (firsts (cdr l))))))
+  #+end_src
+* (insertR new old lat)
+  #+begin_src scheme
+    (define insertR
+      (lambda (new old lat)
+	(cond
+	 ((null? lat) (quote()))
+	 ((eq? (car lat) old)
+	  (cons (car lat)
+		(cons (new(cdr lat)))))
+	 (else (cons (car lat) (insertR(new old (cdr lat))))))))
+  #+end_src
+* (subst2 new o1 o2 lat)
+  #+begin_src scheme
+    (define subst2
+      (lambda (new o1 o2 lat)
+	(cond
+	 (null? lat) (quote())
+	 ((eq? (car lat) o1) (cons new (cdr lat)))
+	 ((eq? (car lat) o2) (cons new (cdr lat)))
+	 (else (cons (car lat) (subst2 new o1 o2 (cdr lat)))))))
+    ;;这个没有写好，要使用更好的办法
+    (define subst2
+      (lambda(new o1 o2 lat)
+	(cond
+	 (null? lat) (quote())
+	 ((or (eq? (car lat) o1) (eq? (car lat) o2))
+	  (cons new (cdr lat)))
+	 (else (cons (car lat)
+		     (subst2 new o1 o2 (cdr lat)))))))
+  #+end_src
+* (zero? a)
+ask if a is zero
+* (sub1 add1)
+  #+begin_src scheme
+    (define sub1
+      (lambda (a)
+	(- a 1)))
+  #+end_src
+  #+begin_src scheme
+    (define add1
+      (lambda (a)
+	(+ a 1)))
+  #+end_src
+* tup and addup tup
+tup is a list of numbers
+tup can be empty
+()
+#+begin_src scheme
+  (define addup
+    (lambda (lat)
+      (cond
+       ((null? lat) 0)
+       (else (+ (car lat)
+	       (addup (cdr lat)))))))
+#+end_src
+* tup+ function
+  #+begin_src scheme
+    (define tup+
+      (lambda (tup1 tup2)
+	(cond
+	 ((and (null? tup1) (null? tup2))
+	  (quote()))
+	 ((or (null? tup1) (null? tup2))
+	  '(length not equil))
+    ;;这里被解析后没有意识到前面的递归内容，看来检查长度还得写一个函数
+	 (else
+	  (cons (+ (car tup1) (car tup2))
+		(tup+ (cdr tup1) (cdr tup2)))))))
+  #+end_src
+if the length of tup1 and tup2 are equal?
+#+begin_src scheme
+  (define eql
+    (lambda (tup1 tup2)
+      (cond
+       ((and (null? tup1) (null? tup2))
+	#t)
+       ((or (null? tup1) (null? tup2))
+	#f)
+       (else (eql (cdr tup1) (cdr tup2))))))
+  (define addtup
+    (lambda (a b)
+      (cond
+       ((eql a b) '(error number of element not equil))
+       ((null? a) (quote()))
+       (else
+	(cons
+	 (+ (car a) (car b))
+	 (addup (cdr a) (cdr b)))))))
+#+end_src
+* (divison)
+  #+begin_src scheme
+    (define divison
+      (define (a b)
+	(cond
+	 ((< a b) 0)
+	 (else
+	  (add1 (divison (- a b) b))))))
+  #+end_src
+* (length)(rempick)
+  #+begin_src scheme
+    (define length
+      (lambda (lat)
+	(cond
+	 ((null? lat) 0)
+	 (else
+	  (add1 (length (cdr lat)))))))
+  #+end_src
+  #+begin_src scheme
+    (define pick
+      (lambda (a lat)
+	(cond
+	 ((or (null? lat) (zero? a)) '(error))
+	 ((eq? a 1) (car lat))
+	 ((and (atom? a) (lat? lat)))
+	 (else (pick (sub1 a) (cdr lat))))))
+  #+end_src
+* (eqan)
+  #+begin_src scheme
+    (define eqan
+      (lambda (a b)
+	(cond
+	 ((and (number? a) (number? b))
+	  (= a b))
+	 ((or (number? a) (number? b))
+	  #f)
+	 (else (eq? a b)))))
+  #+end_src
+* (occur)
+  #+begin_src scheme
+    (define occur
+      (lambda (a lat)
+	(cond
+	 ((null? lat) 0)
+	 ((eq? a (car lat))
+	  (+ 1 (occur a (cdr lat))))
+	 (else (occur a (cdr lat))))))
+  #+end_src
+* startupar*
+** atom?
+   #+begin_src scheme
+     (define
+       (lambda (x)
+	 (and (pair? x) (not (null? x)))))
+   #+end_src
+** rember*
+   #+begin_src scheme
+     (define rember*
+       (lambda (a l)
+	 (cond
+	  ((null? l) (quote()))
+	  ((atom? (car l)) (cond ((eq? (car l) a) (rember* a (cdr l)))
+				 (else (cons (car l) (rember* a (cdr l))))))
+	  ;;最后一段中有一个灵巧的递归，对于car与cdr都进行递归操作
+	  (else (cons (rember* a (car l)) (rember* a (cdr l)))))))
+      ;;在这里不能使用lat？来设计，lat？不能生成稳定的多级递归，这是一个大问题
+    #+end_src
+** insertL/R*
+   #+begin_src scheme
+     (define insertR*
+       (lambda (a b lat)
+	 (cond
+	   ((null? lat) '())
+	   ((atom? (car lat))
+	    (cond
+	      ((eq? (car lat) a)
+	       (cons (car lat) (cons b (insertR* a b (cdr lat)))))
+	      (else
+	       (cons (car lat) (insertR* a b (cdr lat))))))
+	   (else
+	    (cons (insertR* a b (car lat)) (insertR* a b (cdr lat)))))))
+   #+end_src
+** occur*
+   #+begin_src scheme
+     (define occur*
+       (lambda (a l)
+	 (cond
+	   ((null? l) 0)
+	   ((atom? (car l)) (cond
+			      ((eq? a (car l)) (+ 1 (occur* a (cdr l))))
+			      (else (occur* a (cdr l)))))
+	   (else (+ (occur* a (car l)) (occur* a (cdr l)))))))
+   #+end_src
+** subst*
+   #+begin_src scheme
+     (define subst*
+       (lambda (new old l)
+	 (cond
+	   ((null? l) (quote()))
+	   ((atom? (car l))
+	    (cond
+	      ((eq? old (car l)) (cons new (subst* new old (cdr l))))
+	      (else (cons (car l) (subst* new old (cdr l))))))
+	   (else (cons (subst* new old (car l)) (subst* new old (cdr l)))))))
+   #+end_src
+** member*
+   #+begin_src scheme
+     (define member*
+       (lambda (a l)
+	 (cond
+	   ((null? l) #f)
+	   ((atom? (car l))
+	    ;; (cond
+	     ;;((eq? a (car l)) #t)
+	     ;;(else (member* a (cdr l)))))
+	    ;;解释一下：这里这样写不优美，可以用更好的
+	    (or (eq? a (car l)) (member* (cdr l))))
+	   (else (or (member* a (car l)) (member* a (cdr l)))))))
+   #+end_src
+** leftmost and rightmost
+   #+begin_src scheme
+     ;;leftmost 在这里太简单了，但是rightmost倒是很有意思
+     (define rightmost
+       (lambda (l)
+	 (cond
+	   ((null? l) '())
+	   ((null? (cdr l))
+	    ;;判断是否为最后一个元素
+	    (cond
+	     ((atom? (car l)) (car l))
+	     ;;由于后续的递归操作这里肯定是最后一个atom
+	     (else (rightmost (car l)))))
+	   ;;如果不是atom就必须继续递归
+	   (else (rightmost (cdr l))))))
+   #+end_src
+** eqlist
+   #+begin_src scheme
+     (define eqlist?
+       (lambda (l1 l2)
+	 (cond
+	   ((and (null? l1) (null? l2)) #t)
+	   ((or (null? l1) (null? l2)) #f)
+	   ((and (number? (car l1)) (number? (car l2)))
+	    (and (= (car l1) (car l2)) (eqlist? (cdr l1) (cdr l2))))
+	   ((or (number? (car l1)) (number? (car l2))) #f)
+	   ((and (atom? (car l1)) (atom? (car l2)))
+	    (and (eqan? (car l1) (car l2)) (eqlist? (cdr l1) (cdr l2))))
+	   (else
+	    (and (eqlist? (car l1) (car l2)) (eqlist? (cdr l1) (cdr l2)))))))
+     ;;上面可以说写的十分丑陋了这里的atom和number有相对重复，写的太过于教条下面是优化的版本
+     (define eqlist?
+       (lambda (l1 l2)
+	 (cond
+	   ((and (null? l1) (null? l2))
+	    #t)
+	   ((or (null? l1) (null? l2))
+	    #f)
+	   ((and (atom? (car l1)) (atom? l2))
+	    (and
+	     (eqan? (car l1) (car l2))
+	     (eqlist? (cdr l1) (cdr l2))))
+	   ((or (atom? (car l1)) (atom? (car l2)))
+	    #f)
+	   (else
+	    (and
+	     (eqlist? (car l1) (car l2))
+	     (eqlist? (cdr l1) (cdr l2)))))))
+     ;;这个稍微好一点点但是代码格式还是很混乱
+   #+end_src
+** WTMD是个憨批--手打rember+（不使用equal？）
+   #+begin_src scheme
+     (define rember+
+       (lambda (s l)
+	 (cond
+	   ((null? l) '())
+	   ((and (atom? s) (atom? (car l)))
+	    (cond
+	      ((eqan? s (car l)) (cdr l))
+	      (else (cons (car l) (rember+ s (cdr l))))))
+	   ((atom? s)
+	    (cond
+	      ((eqlist? (car l) (rember+ s (car l)))
+	       (cons (rember+ (car l)) (cdr l)))
+	      (else (cons (car l) (rember+ s (cdr l))))))
+	   ((atom? (car l))
+	    (cons (car l) (rember+ s (cdr l))))
+	   (else
+	    (cond
+	      ((eqlist? s (car l)) (cdr l))
+	      ((eqlist? (car l) (rember+ s (car l)))
+	       (cons (car l) (rember+ s (cdr l))))
+	      (else (cons (rember+ s (car l)) (cdr l))))))))
+   #+end_src
