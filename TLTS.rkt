@@ -47,4 +47,11 @@
          ((eqlist? (car l) (rember+ s (car l)))
           (cons (car l) (rember+ s (cdr l))))
          (else (cons (rember+ s (car l)) (cdr l))))))))
-      
+(define equal?
+  (lambda (s1 s2)
+    (cond
+      ((and (atom? s1) (atom? s2))
+       (eqan? s1 s2))
+      ((or (atom? s1) (atom? s2)) #f)
+      (else
+       (eqlist? s1 s2)))))
