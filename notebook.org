@@ -365,3 +365,20 @@ if the length of tup1 and tup2 are equal?
 	       (cons (car l) (rember+ s (cdr l))))
 	      (else (cons (rember+ s (car l)) (cdr l))))))))
    #+end_src
+* shadow
+** failtry(要读题)
+   #+begin_src scheme
+     ;说实话虽然没有好好看题目，但是收获还是有的
+     (define failsubexpa?
+       (lambda (l)
+	 (cond
+	   ((null? l) #f)
+	   ((atom? (car l))
+	    (cond
+	      ((or (eq? (car l) '+) (eq? (car l) '*) (eq? (car l) '*) (number? (car l)))
+	       (cond
+		 ((null? (cdr l)) #t)
+		 (else (subexpa? (cdr l)))))))
+	   (else (and (subexpa? (car l)) (or (subexpa? (cdr l)) (null? (cdr l))))))))
+   #+end_src
+** numbered?(可以扩展，已经有了思路)
