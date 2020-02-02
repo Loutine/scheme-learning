@@ -1,0 +1,1 @@
+("7.5" racket ("78327b58c4010e9e66dabad481d3c36e0b6aa276" . "ee82a8688c5fdbb64e97f5cf7d58a4ea5a9b818a") #"/home/loutine/scheme-learning/refresh.rkt" #"/home/loutine/scheme-learning/refresh2.rkt" #"/home/loutine/scheme-learning/refresh3.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

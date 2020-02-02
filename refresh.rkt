@@ -1,4 +1,5 @@
 #lang racket
+(provide (all-defined-out))
 (define atom?
   (lambda (x)
     (and (not (pair? x)) (not (null? x)))))
@@ -16,14 +17,14 @@
   (lambda (a lat)
     (and
      (not (null? lat))
-     (or (eq? (car lat) a) (member? a (cdr lat))))))
+     (or (equal? (car lat) a) (member? a (cdr lat))))))
 ;;member? look up if element a in lat
 ;;or you can use a easy way to define it
 (define rember?
   (lambda (a lat)
     (cond
       [(null? lat) '()]
-      [(eq? a (car lat)) (cdr lat)]
+      [(equal? a (car lat)) (cdr lat)]
       [else (cons (car lat) (rember? a (cdr lat)))])))
 ;; remove the first member
 (define firsts
@@ -37,35 +38,38 @@
   (lambda (new old lat)
     (cond
       [(null? lat) '()]
-      [(eq? old (car lat)) (cons (cons old new) (cdr lat))]
-      [else (cons (car lat) (insertR new old (cdr lat)))])))
+      [(equal? old (car lat))
+       (cons old (cons new (cdr lat)))]
+      [else (cons (car lat)
+                  (insertR new old (cdr lat)))])))
 ;;insertR once in a list
 (define insertL
   (lambda (new old lat)
     (cond
       [(null? lat) '()]
-      [(eq? old (car (cdr lat))) (cons (cons (car lat) new) (cdr lat))]
+      [(equal? old (car (cdr lat)))
+       (cons new (cons old (cdr lat)))]
       [else (cons (car lat) (insertL new old (cdr lat)))])))
 ;;insertL once in a list
 (define (subst new old lat)
   (cond
    [(null? lat) '()]
-   [(eq? (car lat) old) (cons new (cdr lat))]
+   [(equal? (car lat) old) (cons new (cdr lat))]
    [else (cons (car lat) (subst new old (cdr lat)))]))
 ;;subst use for  substitute a element in list
 (define subst2
   (lambda (new o1 o2 lat)
     (cond
       [(null? lat) '()]
-      [(eq? (car lat) o1) (cons new (cdr lat))]
-      [(eq? (car lat) o2) (cons new (cdr lat))]
+      [(equal? (car lat) o1) (cons new (cdr lat))]
+      [(equal? (car lat) o2) (cons new (cdr lat))]
       [else (cons (car lat) (subst2 new o1 o2 (cdr lat)))])))
 ;;subst2 have 2 choices but only substitute for once
 (define multirember
   (lambda (a lat)
     (cond
       [(null? lat) '()]
-      [(eq? a (car lat))
+      [(equal? a (car lat))
         (multirember a (cdr lat))]
       [else
        (cons
@@ -76,7 +80,7 @@
   (lambda (new old lat)
     (cond
       [(null? lat) '()]
-      [(eq? (car lat) old)
+      [(equal? (car lat) old)
        (cons old
              (cons new
                    (multiinsertR new old (cdr lat))))]
@@ -87,7 +91,7 @@
   (lambda (new old lat)
     (cond
       [(null? lat) '()]
-      [(eq? (car (cdr lat)) old)
+      [(equal? (car (cdr lat)) old)
        (cons (car lat) (cons new (multiinsertL new old (cdr lat))))]
       [else (cons (car lat)
                   (multiinsertL new old (cdr lat)))])))
@@ -96,7 +100,7 @@
   (lambda (new old lat)
     (cond
       [(null? lat) '()]
-      [(eq? (car lat) old)
+      [(equal? (car lat) old)
        (cons new (multisubst new old (cdr lat)))]
       [else (cons (car lat)
                   (multisubst new old (cdr lat)))])))
@@ -124,7 +128,74 @@
 (define divide
   (lambda (n m)
     (cond
-      [(zero? n) 0 (print "lasdf")]
+      [(zero? n) (print "divisable") 0]
       [(< n m) 0]
       [else (succ (divide (- n m) m))])))
 ;;a not perfect demo of divide
+(define length
+  (lambda (l)
+    (cond
+      [(null? l) 0]
+      [else (succ (length (cdr l)))])))
+;;use for detact the length of a lat
+(define pick
+  (lambda (n lat)
+    (cond
+      [(or (< n 1) (null? lat)) (print "no answer")]
+      [(= n 1) (car lat)]
+      [else (pick (pred n) (cdr lat))])))
+;;a function for pick a element using the index number
+(define rempick
+  (lambda (n lat)
+    (cond
+      [(or (< n 1) (null? lat)) (print "no answer")]
+      [(= n 1) (cdr lat)]
+      [else (cons
+             (car lat)
+             (rempick (pred n) (cdr lat)))])))
+;;a function for removing the element in particular index number
+(define no-nums
+  (lambda (lat)
+    (cond
+      [(null? lat) '()]
+      [(number? (car lat)) (no-nums (cdr lat))]
+      [else (cons (car lat) (no-nums (cdr lat)))])))
+;; a function for removing all numbers
+(define all-nums
+  (lambda (lat)
+    (cond
+      [(null? lat) '()]
+      [(number? (car lat))
+       (cons (car lat)
+             (all-nums (cdr lat)))]
+      [else (all-nums (cdr lat))])))
+;;the opposite side of no-nums
+(define eqan?
+  (lambda (a1 a2)
+     (cond
+      [(and (number? a1) (number? a2))
+       (= a1 a2)]
+      [(or (number? a1) (number? a2))
+       #f]
+      [else (equal? a1 a2)])))
+;;eqan? not use point for number
+(define (occur a lat)
+  (cond
+    [(null? lat) 0]
+    [(eqan? a (car lat))
+     (succ (occur a (cdr lat)))]
+    [else (occur a (cdr lat))]))
+;;show how many times it shows in a element
+(define one?
+  (lambda (a)
+    (zero? (pred a))))
+;;detact if it is 1
+(define rempick-re
+  (lambda (n lat)
+    (cond
+      [(or (null? lat) (< (length lat) n) (< n 0))
+       (print "Error") '()]
+      [(one? n) (cdr lat)]
+      [else (cons (car lat)
+                  (rempick-re (pred n) (cdr lat)))])))
+;;remix!!! use one?
